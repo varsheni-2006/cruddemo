@@ -1,0 +1,80 @@
+pipeline {
+    agent any
+    tools {
+        nodejs 'nodejs'
+    }
+
+    stages {
+        stage('Git Checkout') {
+            steps {
+                git url:"https://github.com/RAravinthRaj/QuizApp", branch:"main"
+            }
+        }
+        stage('NPM Run Install') {
+            steps {
+                sh "npm install"
+            }
+        }
+        stage('Build React App') {
+            steps {
+                sh "npm run build"
+            }
+        }
+        stage('Deploy Locally') {
+            steps {
+                sh "npx serve -s build -l 3000 &"
+            }
+        }
+    }
+    
+    post {
+        success {
+            echo "React App Built Successfully"
+        }
+        failure {
+            echo "Error Occurs"
+        }
+    }
+}
+call npm ci||call npm install
+call npm run build
+mkdir "C:\ProgramData\Jenkins\.jenkins\workspace\demo"
+xcopy/E/I/Y "dist\*""C:\ProgramData\Jenkins\.jenkins\workspace\demo"
+
+
+C:\ProgramData\Jenkins\.jenkins\workspace\demo\dist>cd..
+
+C:\ProgramData\Jenkins\.jenkins\workspace\demo>npm install -g serve
+
+changed 86 packages in 38s
+
+25 packages are looking for funding
+  run `npm fund` for details
+
+C:\ProgramData\Jenkins\.jenkins\workspace\demo>start serve -s . -l 9000
+
+C:\ProgramData\Jenkins\.jenkins\workspace\demo>
+
+
+
+
+
+
+
+
+
+
+FROM node:18-alpine as build
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+
+FROM nginx:alpine
+COPY --from=build /app/dist /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+
+docker build -t docker_username/imagename .
+ docker run -d -p 3000:80 docker_username/imagename
